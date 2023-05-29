@@ -14,15 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef INCLUDED_IEEE802_11_API_H
-#define INCLUDED_IEEE802_11_API_H
+#ifndef @GUARD_NAME@
+#define @GUARD_NAME@
 
-#include <gnuradio/attributes.h>
+#include <ieee802_11/api.h>
+#include <gnuradio/sync_block.h>
 
-#ifdef gnuradio_ieee802_11_EXPORTS
-#  define IEEE802_11_API __GR_ATTR_EXPORT
-#else
-#  define IEEE802_11_API __GR_ATTR_IMPORT
-#endif
+namespace gr {
+namespace ieee802_11 {
 
-#endif /* INCLUDED_IEEE802_11_API_H */
+class IEEE802_11_API @NAME@ : virtual public sync_block
+{
+public: 
+	typedef boost::shared_ptr<@NAME@> sptr;
+	static sptr make(int length);
+
+	virtual int length() const = 0;
+	virtual void set_length(int length) = 0;
+
+};
+
+} /* namespace blocks */
+} /* namespace gr */
+
+#endif /* @GUARD_NAME@ */
