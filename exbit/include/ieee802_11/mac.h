@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Bastian Bloessl <bloessl@ccs-labs.org>
+ * Copyright (C) 2013, 2016 Bastian Bloessl <bloessl@ccs-labs.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,15 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef INCLUDED_IEEE802_11_API_H
-#define INCLUDED_IEEE802_11_API_H
+#ifndef INCLUDED_IEEE802_11_MAC_H
+#define INCLUDED_IEEE802_11_MAC_H
 
-#include <gnuradio/attributes.h>
+#include <ieee802_11/api.h>
+#include <gnuradio/block.h>
 
-#ifdef gnuradio_ieee802_11_EXPORTS
-#  define IEEE802_11_API __GR_ATTR_EXPORT
-#else
-#  define IEEE802_11_API __GR_ATTR_IMPORT
-#endif
+namespace gr {
+namespace ieee802_11 {
 
-#endif /* INCLUDED_IEEE802_11_API_H */
+class IEEE802_11_API mac : virtual public block
+{
+public:
+
+	typedef boost::shared_ptr<mac> sptr;
+	static sptr make(std::vector<uint8_t> src_mac,
+			std::vector<uint8_t> dst_mac,
+			std::vector<uint8_t> bss_mac);
+};
+
+}  // namespace ieee802_11
+}  // namespace gr
+
+#endif /* INCLUDED_IEEE802_11_MAC_H */

@@ -14,15 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef INCLUDED_IEEE802_11_API_H
-#define INCLUDED_IEEE802_11_API_H
+#ifndef INCLUDED_IEEE802_11_CHUNKS_TO_SYMBOLS_H
+#define INCLUDED_IEEE802_11_CHUNKS_TO_SYMBOLS_H
 
-#include <gnuradio/attributes.h>
+#include <ieee802_11/api.h>
+#include <gnuradio/tagged_stream_block.h>
 
-#ifdef gnuradio_ieee802_11_EXPORTS
-#  define IEEE802_11_API __GR_ATTR_EXPORT
-#else
-#  define IEEE802_11_API __GR_ATTR_IMPORT
-#endif
+namespace gr {
+namespace ieee802_11 {
 
-#endif /* INCLUDED_IEEE802_11_API_H */
+class IEEE802_11_API chunks_to_symbols : virtual public tagged_stream_block
+{
+public:
+        typedef boost::shared_ptr<chunks_to_symbols> sptr;
+        static sptr make();
+};
+
+} /* namespace ieee802_11 */
+} /* namespace gr */
+
+#endif /* INCLUDED_IEEE802_11_CHUNKS_TO_SYMBOLS_H */
