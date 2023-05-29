@@ -1,0 +1,67 @@
+(* Hashing with PTK *)
+
+type key.
+fun h(bitstring, key): bitstring.
+reduc forall m: bitstring, k: key; sdec(h(m,k),k) = m.
+
+
+(* Asymmetric key encryption *)
+
+type skey.
+type pkey.
+
+fun pk(skey): pkey.
+fun aenc(bitstring, pkey): bitstring.
+
+reduc forall m: bitstring, sk: skey; adec(aenc(m,pk(sk)),sk) = m.
+
+
+(* Digital signatures *)
+
+type sskey.
+type spkey.
+
+fun spk(sskey): spkey.
+fun sign(bitstring, sskey): bitstring.
+
+reduc forall m: bitstring, ssk: sskey; getmess(sign(m,ssk)) = m.
+reduc forall m: bitstring, ssk: sskey; checksign(sign(m,ssk),spk(ssk)) = m.
+
+
+free c:channel.
+
+free s:bitstring [private].
+query attacker(s).
+
+event acceptsStation(key).
+event acceptsAccessPoint(key,pkey).
+event termStation(key,pkey).
+event termAccessPoint(key).
+
+query x:key,y:pkey; event(termStation(x,y))==>event(acceptsAccessPoint(x,y)).
+(* query x:key; inj-event(termAccessPoint(x))==>inj-event(acceptsStation(x)). *)
+
+let StationA(pkA:pkey,skA:skey,pkB:spkey) = 
+	out(c,pkA);
+	in(c,x:bitstring); 
+	let y = adec(x,skA) in
+	let (=pkA,=pkB,k:key) = checksign(y,pkB) in
+	event acceptsStation(k);
+	out(c,h(s,k));
+	event termStation(k,pkA).
+
+let AccessPointB(pkB:spkey,skB:sskey,pkA:pkey) = 
+	in(c,pkX:pkey);
+	new k:key; 
+	event acceptsAccessPoint(k,pkX);
+	out(c,aenc(sign((pkX,pkB,k),skB),pkX));
+	in(c,x:bitstring); 
+	let z = sdec(x,k) in
+	if pkX = pkA then event termAccessPoint(k).
+
+process 
+	new skA:skey; 
+	new skB:sskey;
+	let pkA = pk(skA) in out(c,pkA);
+	let pkB = spk(skB) in out(c,pkB);
+	( (!StationA(pkA,skA,pkB)) | (!AccessPointB(pkB,skB,pkA)) )
