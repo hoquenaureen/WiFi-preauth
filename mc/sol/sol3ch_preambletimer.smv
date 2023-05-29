@@ -1,0 +1,226 @@
+MODULE main
+
+VAR 
+	fake_CSA_Y 	: boolean;
+	real_CSA_Y	: boolean;
+	fake_CSA_Z 	: boolean;
+	real_CSA_Z	: boolean;
+	probe_res	: boolean;
+	eapol4_X	: boolean;
+	eapol4_Y	: boolean;
+	eapol4_Z	: boolean;
+	fake_PreBits	: boolean;
+	ChN			: boolean;
+	SeqN		: boolean;
+	timer		: boolean;
+	retransmitN	: boolean;
+	
+	
+	STA_location  	: 
+	{
+				STA_Discon,  
+				STA_CE,  
+				STA_AP_Con_ChX,
+				STA_AP_Con_ChY,
+				STA_AP_Con_ChZ
+	};
+	
+	AP_location  	: 
+	{
+				AP_Discon,
+				AP_CE,  
+				AP_STA_Con_ChX,
+				AP_STA_Con_ChY,
+				AP_STA_Con_ChZ
+	};
+
+ASSIGN
+		init(probe_res) := TRUE;
+		
+		next(probe_res) := case
+		
+		 				TRUE			: {probe_res}; 
+						  
+						esac;
+						
+---ASSIGN
+---		init(timer) := TRUE;
+		
+---		next(timer) := case
+		
+---		 				TRUE			: {timer}; 
+						  
+---						esac;
+						
+---ASSIGN
+---		init(retransmitN) := TRUE;
+		
+---		next(retransmitN) := case
+		
+---		 				TRUE			: {retransmitN}; 
+						  
+---						esac;
+
+--------------------------------------------------------------------------------------------------							
+						
+						
+ASSIGN
+		init(fake_CSA_Y) := TRUE;
+		
+		next(fake_CSA_Y) := case
+		
+		 				TRUE			: {fake_CSA_Y}; 
+						  
+						esac;
+						
+ASSIGN
+		init(eapol4_Z) := TRUE; ---- make X for AP in X and STA in Y, make Z for AP in Z and STA in Y
+		
+		next(eapol4_Z) := case
+		
+		 				TRUE			: {eapol4_Z}; 
+						  
+						esac;
+						
+						
+ASSIGN
+		init(real_CSA_Z) := TRUE;
+		
+		next(real_CSA_Z) := case
+		
+		 				TRUE			: {real_CSA_Z}; 
+						  
+						esac;
+								
+
+------------------------------------------------------------------------------------------------	
+
+
+ASSIGN
+		init(fake_PreBits) := TRUE;
+		
+		next(fake_PreBits) := case
+		
+		 				TRUE			: {fake_PreBits}; 
+						  
+						esac;
+						
+						
+ASSIGN
+		init(ChN) := TRUE;
+		
+		next(ChN) := case
+		
+		 				TRUE			: {ChN}; 
+						  
+						esac;
+
+
+ASSIGN
+		init(SeqN) := TRUE;
+		
+		next(SeqN) := case
+		
+		 				TRUE			: {SeqN}; 
+						  
+						esac;
+																
+
+	
+ASSIGN
+		init(STA_location) := STA_Discon;
+		
+		next(STA_location) := case
+		
+						  (STA_location = STA_Discon) & (!probe_res)																: STA_Discon;
+						  (STA_location = STA_Discon) & (probe_res)																	: STA_CE;
+		
+						  (STA_location = STA_CE) & (!probe_res)																	: STA_CE;
+						  (STA_location = STA_CE) & (probe_res & !fake_CSA_Z & !real_CSA_Z & !eapol4_X)								: STA_CE;
+						  (STA_location = STA_CE) & (probe_res & !fake_CSA_Y & !real_CSA_Y & !eapol4_X)								: STA_CE;
+						  
+						  (STA_location = STA_CE) & (probe_res & !fake_CSA_Y & !real_CSA_Y & eapol4_X & !fake_PreBits & timer & retransmitN & ChN & SeqN)			: STA_AP_Con_ChX;
+						  (STA_location = STA_CE) & (probe_res & fake_CSA_Y & !real_CSA_Y & eapol4_X  & !fake_PreBits & timer & retransmitN & ChN & SeqN)			: STA_AP_Con_ChX;
+						  
+						  (STA_location = STA_CE) & (probe_res & !fake_CSA_Z & !real_CSA_Z & eapol4_X & !fake_PreBits & timer & retransmitN & ChN & SeqN)			: STA_AP_Con_ChX;
+						  (STA_location = STA_CE) & (probe_res & fake_CSA_Z & !real_CSA_Z & eapol4_X  & !fake_PreBits & timer & retransmitN & ChN & SeqN)			: STA_AP_Con_ChX;
+						  
+						  (STA_location = STA_CE) & (probe_res & !fake_CSA_Y & !real_CSA_Y & eapol4_X & (fake_PreBits | !ChN | !SeqN | !retransmitN))			: STA_Discon;
+						  (STA_location = STA_CE) & (probe_res & !fake_CSA_Z & !real_CSA_Z & eapol4_X & (fake_PreBits | !ChN | !SeqN | !retransmitN))			: STA_Discon;
+						  
+						  (STA_location = STA_CE) & (probe_res & !fake_CSA_Z & !real_CSA_Z & eapol4_Y & !fake_PreBits  & timer & retransmitN & ChN & SeqN)			: STA_AP_Con_ChY;
+						  
+						  (STA_location = STA_CE) & (probe_res & !fake_CSA_Z & !real_CSA_Z & eapol4_Y &  (fake_PreBits | !ChN | !SeqN | !retransmitN))			: STA_Discon;
+
+						  (STA_location = STA_CE) & (probe_res & !fake_CSA_Y & real_CSA_Y & eapol4_Y & !fake_PreBits & timer & retransmitN & ChN & SeqN)				: STA_AP_Con_ChY;
+						  (STA_location = STA_CE) & (probe_res & fake_CSA_Y & real_CSA_Y & eapol4_Y & !fake_PreBits & timer & retransmitN & ChN & SeqN)				: STA_AP_Con_ChY;
+						  						 
+						  (STA_location = STA_CE) & (probe_res & !fake_CSA_Z & real_CSA_Z & eapol4_Z & !fake_PreBits & timer & retransmitN & ChN & SeqN)				: STA_AP_Con_ChZ;
+						  (STA_location = STA_CE) & (probe_res & fake_CSA_Z & real_CSA_Z & eapol4_Z & !fake_PreBits & timer & retransmitN & ChN & SeqN)				: STA_AP_Con_ChZ;
+						  
+						  (STA_location = STA_CE) & (probe_res & !fake_CSA_Y & !real_CSA_Y & eapol4_Z &  (fake_PreBits | !ChN | !SeqN | !retransmitN))			: STA_Discon;
+						  
+						  (STA_location = STA_CE) & (probe_res & fake_CSA_Y & !real_CSA_Y & !fake_CSA_Z & real_CSA_Z &  !eapol4_X &  !eapol4_Y & eapol4_Z &  (fake_PreBits | !ChN | !SeqN | !retransmitN))			: STA_Discon;
+
+						 
+						  (STA_location = STA_AP_Con_ChX)																			: STA_AP_Con_ChX;
+					
+						  (STA_location = STA_AP_Con_ChY)																			: STA_AP_Con_ChY;
+					
+						  (STA_location = STA_AP_Con_ChZ)																			: STA_AP_Con_ChZ;
+
+						  
+						  TRUE																										: {STA_CE}; 
+						   				  
+						  esac;
+						  
+						  
+ASSIGN
+		init(AP_location) := AP_Discon;
+		
+		next(AP_location) := case
+		
+						  (AP_location = AP_Discon) & (!probe_res)																	: AP_Discon;
+						  (AP_location = AP_Discon) & (probe_res)																	: AP_CE;
+		
+						  (AP_location = AP_CE) & (!probe_res)																		: AP_CE;
+						  (AP_location = AP_CE) & (probe_res & !fake_CSA_Z & !real_CSA_Z & !eapol4_X)								: AP_CE;
+						  (AP_location = AP_CE) & (probe_res & !fake_CSA_Y & !real_CSA_Y & !eapol4_X)								: AP_CE;
+						  
+						  (AP_location = AP_CE) & (probe_res & !fake_CSA_Y & !real_CSA_Y & eapol4_X & !fake_PreBits & timer & retransmitN & ChN & SeqN)				: AP_STA_Con_ChX;
+						  (AP_location = AP_CE) & (probe_res & fake_CSA_Y & !real_CSA_Y & eapol4_X  & !fake_PreBits & timer & retransmitN & ChN & SeqN)				: AP_STA_Con_ChX;
+						  
+						  (AP_location = AP_CE) & (probe_res & !fake_CSA_Z & !real_CSA_Z & eapol4_X & !fake_PreBits & timer & retransmitN & ChN & SeqN)				: AP_STA_Con_ChX;
+						  (AP_location = AP_CE) & (probe_res & fake_CSA_Z & !real_CSA_Z & eapol4_X  & !fake_PreBits & timer & retransmitN & ChN & SeqN)				: AP_STA_Con_ChX;
+						  
+						  (AP_location = AP_CE) & (probe_res & !fake_CSA_Y & !real_CSA_Y & eapol4_X & (fake_PreBits | !ChN | !SeqN | !retransmitN))			: AP_Discon;
+						  (AP_location = AP_CE) & (probe_res & !fake_CSA_Z & !real_CSA_Z & eapol4_X & (fake_PreBits | !ChN | !SeqN | !retransmitN))			: AP_Discon;
+						  
+						  (AP_location = AP_CE) & (probe_res & !fake_CSA_Z & !real_CSA_Z & eapol4_Y & !fake_PreBits & timer & retransmitN & ChN & SeqN)				: AP_STA_Con_ChY;
+						  
+						  (AP_location = AP_CE) & (probe_res & !fake_CSA_Z & !real_CSA_Z & eapol4_Y &  (fake_PreBits | !ChN | !SeqN | !retransmitN))			: AP_Discon;
+
+						  (AP_location = AP_CE) & (probe_res & !fake_CSA_Y & real_CSA_Y & eapol4_Y & !fake_PreBits & timer & retransmitN & ChN & SeqN)				: AP_STA_Con_ChY;
+						  (AP_location = AP_CE) & (probe_res & fake_CSA_Y & real_CSA_Y & eapol4_Y & !fake_PreBits & timer & retransmitN & ChN & SeqN)				: AP_STA_Con_ChY;
+						  						  
+						  (AP_location = AP_CE) & (probe_res & !fake_CSA_Z & real_CSA_Z & eapol4_Z & !fake_PreBits & timer & retransmitN & ChN & SeqN)				: AP_STA_Con_ChZ;
+						  (AP_location = AP_CE) & (probe_res & fake_CSA_Z & real_CSA_Z & eapol4_Z & !fake_PreBits  & timer & retransmitN & ChN & SeqN)				: AP_STA_Con_ChZ;
+						  
+						  (AP_location = AP_CE) & (probe_res & !fake_CSA_Y & !real_CSA_Y & eapol4_Z &  (fake_PreBits | !ChN | !SeqN | !retransmitN))			: AP_Discon;
+						  
+						  (AP_location = AP_CE) & (probe_res & fake_CSA_Y & !real_CSA_Y & !fake_CSA_Z & real_CSA_Z &  !eapol4_X &  !eapol4_Y & eapol4_Z &  (fake_PreBits | !ChN | !SeqN | !retransmitN))			: AP_Discon;
+
+
+						  
+						  (AP_location = AP_STA_Con_ChX)																			: AP_STA_Con_ChX;
+						
+						  (AP_location = AP_STA_Con_ChY)																			: AP_STA_Con_ChY;
+						  
+						  (AP_location = AP_STA_Con_ChZ)																			: AP_STA_Con_ChZ;
+						  
+						  
+						  TRUE																										: {AP_CE}; 
+						  
+						  
+						  	  
+						  esac;
