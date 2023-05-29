@@ -15,31 +15,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDED_IEEE802_11_EQUALIZER_BASE_H
-#define INCLUDED_IEEE802_11_EQUALIZER_BASE_H
+#ifndef INCLUDED_IEEE802_11_EQUALIZER_LMS_H
+#define INCLUDED_IEEE802_11_EQUALIZER_LMS_H
 
-#include <gnuradio/gr_complex.h>
-#include <gnuradio/digital/constellation.h>
+#include "base.h"
+#include <vector>
 
 namespace gr {
 namespace ieee802_11 {
 namespace equalizer {
 
-class base {
+class lms: public base {
 public:
-	virtual ~base() {};
-	virtual void equalize(gr_complex *in, int n, gr_complex *symbols, uint8_t *bits, boost::shared_ptr<gr::digital::constellation> mod) = 0;
-	virtual double get_snr() = 0;
+	virtual void equalize(gr_complex *in, int n, gr_complex *symbols, uint8_t *bits, boost::shared_ptr<gr::digital::constellation> mod);
+private:
+	double get_snr();
 
-	static const gr_complex POLARITY[127];
 
-protected:
-	//static const gr_complex LONG[64];
-	static const gr_complex LONG[128];//for ac
+	gr_complex d_H[64];
+	double d_snr;
+	const double alpha = 0.5;
 };
 
 } /* namespace channel_estimation */
 } /* namespace ieee802_11 */
 } /* namespace gr */
 
-#endif /* INCLUDED_IEEE802_11_EQUALIZER_BASE_H */
+#endif /* INCLUDED_IEEE802_11_EQUALIZER_LMS_H */
